@@ -52,8 +52,24 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<ApplicationDbContext>();
-    await DbInitializer.SeedAsync(context);
+    try
+    {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        var connectionStringCheck = context.Database.GetConnectionString();
+
+        if (!string.IsNullOrWhiteSpace(connectionStringCheck))
+        {
+            await DbInitializer.SeedAsync(context);
+        }
+        else
+        {
+            Console.WriteLine("No se encontró la cadena de conexión, se omitió SeedAsync.");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error al inicializar la base de datos: {ex.Message}");
+    }
 }
 
 app.Run();
