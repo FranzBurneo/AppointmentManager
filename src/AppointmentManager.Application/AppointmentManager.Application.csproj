@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AppointmentManager.Domain\AppointmentManager.Domain.csproj" />
+    <ProjectReference Include="..\AppointmentManager.Infrastructure\AppointmentManager.Infrastructure.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

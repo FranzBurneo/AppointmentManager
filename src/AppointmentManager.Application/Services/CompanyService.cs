@@ -1,69 +1,45 @@
-﻿using AppointmentManager.Application.DTOs;
-using AppointmentManager.Application.Interfaces;
+﻿using AppointmentManager.Application.Interfaces;
 using AppointmentManager.Domain.Entities;
+using AppointmentManager.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
-namespace AppointmentManager.Application.Services;
-
-public class CompanyService(IRepository<Company> repository) : ICompanyService
+namespace AppointmentManager.Application.Services
 {
-    private readonly IRepository<Company> _repository = repository;
-
-    public async Task<IEnumerable<CompanyDto>> GetAllAsync()
+    public class CompanyService : ICompanyService
     {
-        var companies = await _repository.GetAllAsync();
-        return companies.Select(c => new CompanyDto
+        private readonly ApplicationDbContext _context;
+
+        public CompanyService(ApplicationDbContext context)
         {
-            Id = c.Id,
-            Name = c.Name,
-            Address = c.Address,
-            Phone = c.Phone,
-            IsActive = c.IsActive
-        });
-    }
+            _context = context;
+        }
 
-    public async Task<CompanyDto?> GetByIdAsync(Guid id)
-    {
-        var company = await _repository.GetByIdAsync(id);
-        if (company is null) return null;
-
-        return new CompanyDto
+        public async Task<IEnumerable<Company>> GetAllAsync()
         {
-            Id = company.Id,
-            Name = company.Name,
-            Address = company.Address,
-            Phone = company.Phone,
-            IsActive = company.IsActive
-        };
-    }
+            return await _context.Companies.ToListAsync();
+        }
 
-    public async Task<CompanyDto> CreateAsync(CompanyDto dto)
-    {
-        var company = new Company
+        public async Task<Company?> GetByIdAsync(Guid id)
         {
-            Id = Guid.NewGuid(),
-            Name = dto.Name,
-            Address = dto.Address,
-            Phone = dto.Phone,
-            IsActive = dto.IsActive
-        };
+            return await _context.Companies.FindAsync(id);
+        }
 
-        await _repository.AddAsync(company);
-        dto.Id = company.Id;
-        return dto;
+        public async Task AddAsync(Company company)
+        {
+            _context.Companies.Add(company);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(Company company)
+        {
+            _context.Companies.Update(company);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(Company company)
+        {
+            _context.Companies.Remove(company);
+            await _context.SaveChangesAsync();
+        }
     }
-
-    public async Task<bool> UpdateAsync(CompanyDto dto)
-    {
-        var company = await _repository.GetByIdAsync(dto.Id);
-        if (company is null) return false;
-
-        company.Name = dto.Name;
-        company.Address = dto.Address;
-        company.Phone = dto.Phone;
-        company.IsActive = dto.IsActive;
-
-        return await _repository.UpdateAsync(company);
-    }
-
-    public async Task<bool> DeleteAsync(Guid id) => await _repository.DeleteAsync(id);
 }

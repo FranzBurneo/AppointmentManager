@@ -1,12 +1,13 @@
-﻿using AppointmentManager.Application.DTOs;
+﻿using AppointmentManager.Domain.Entities;
 
-namespace AppointmentManager.Application.Interfaces;
-
-public interface ICompanyService
+namespace AppointmentManager.Application.Interfaces
 {
-    Task<IEnumerable<CompanyDto>> GetAllAsync();
-    Task<CompanyDto?> GetByIdAsync(Guid id);
-    Task<CompanyDto> CreateAsync(CompanyDto company);
-    Task<bool> UpdateAsync(CompanyDto company);
-    Task<bool> DeleteAsync(Guid id);
+    public interface ICompanyService
+    {
+        Task<IEnumerable<Company>> GetAllAsync();
+        Task<Company?> GetByIdAsync(Guid id);
+        Task AddAsync(Company company);
+        Task UpdateAsync(Company company);
+        Task DeleteAsync(Company company);
+    }
 }

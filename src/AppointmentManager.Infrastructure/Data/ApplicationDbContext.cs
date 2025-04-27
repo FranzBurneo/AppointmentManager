@@ -1,23 +1,60 @@
 ﻿using AppointmentManager.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace AppointmentManager.Infrastructure.Data;
-
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
+namespace AppointmentManager.Infrastructure.Data
 {
-    public DbSet<Company> Companies => Set<Company>();
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public class ApplicationDbContext : DbContext
     {
-        base.OnModelCreating(modelBuilder);
-
-        modelBuilder.Entity<Company>(entity =>
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
         {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Name).IsRequired().HasMaxLength(150);
-            entity.Property(e => e.Email).HasMaxLength(100);
-            entity.Property(e => e.Phone).HasMaxLength(20);
-            entity.Property(e => e.Website).HasMaxLength(150);
-        });
+        }
+
+        // DbSets
+        public DbSet<Company> Companies { get; set; }
+        public DbSet<Employee> Employees { get; set; }
+        public DbSet<Service> Services { get; set; }
+        public DbSet<EmployeeSchedule> EmployeeSchedules { get; set; }
+        public DbSet<Appointment> Appointments { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Company
+            modelBuilder.Entity<Company>()
+                .HasMany(c => c.Employees)
+                .WithOne(e => e.Company)
+                .HasForeignKey(e => e.CompanyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Company>()
+                .HasMany(c => c.Services)
+                .WithOne(s => s.Company)
+                .HasForeignKey(s => s.CompanyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Employee
+            modelBuilder.Entity<Employee>()
+                .HasMany(e => e.Schedules)
+                .WithOne(s => s.Employee)
+                .HasForeignKey(s => s.EmployeeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Service - Appointment
+            modelBuilder.Entity<Service>()
+                .HasMany(s => s.Appointments)
+                .WithOne(a => a.Service)
+                .HasForeignKey(a => a.ServiceId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Appointment - Employee
+            modelBuilder.Entity<Appointment>()
+                .HasOne(a => a.Employee)
+                .WithMany()
+                .HasForeignKey(a => a.EmployeeId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
+
     }
 }

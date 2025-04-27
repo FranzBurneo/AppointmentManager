@@ -1,4 +1,4 @@
-﻿using AppointmentManager.Application.Interfaces;
+﻿using AppointmentManager.Domain.Interfaces;
 using AppointmentManager.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
