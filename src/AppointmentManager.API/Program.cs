@@ -10,9 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Configuración 
 builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
+    .AddEnvironmentVariables()
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
-    .AddEnvironmentVariables();
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
 // Servicios
 builder.Services.AddControllers();
