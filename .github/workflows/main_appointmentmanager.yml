@@ -1,7 +1,5 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy ASP.Net Core app to Azure Web App - appointmentmanager
+# GitHub Actions: Build and deploy ASP.NET Core app to Azure Web App
+name: Build and deploy ASP.NET Core app to Azure Web App - appointmentmanager
 
 on:
   push:
@@ -13,27 +11,31 @@ jobs:
   build:
     runs-on: windows-latest
     permissions:
-      contents: read
+      contents: read # Necesario para actions/checkout
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set up .NET Core
+      - name: Set up .NET 9.0
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x' # <- aquí la versión correcta de tu proyecto
+          dotnet-version: '9.0.x'
 
-      - name: Build with dotnet
-        run: dotnet build src/AppointmentManager.sln --configuration Release # <- indicamos el path correcto
+      - name: Restore dependencies
+        run: dotnet restore ./src/AppointmentManager.sln
 
-      - name: dotnet publish
-        run: dotnet publish src/AppointmentManager.sln -c Release -o publish_output # <- igual indicamos el path correcto
+      - name: Build
+        run: dotnet build ./src/AppointmentManager.sln --configuration Release --no-restore
 
-      - name: Upload artifact for deployment job
+      - name: Publish
+        run: dotnet publish ./src/AppointmentManager.API/AppointmentManager.API.csproj --configuration Release --output ./publish --no-build
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: .net-app
-          path: publish_output # <- ahora se sube correctamente el build
+          name: app
+          path: ./publish
 
   deploy:
     runs-on: windows-latest
@@ -46,10 +48,10 @@ jobs:
       contents: read
 
     steps:
-      - name: Download artifact from build job
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: .net-app
+          name: app
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -64,4 +66,4 @@ jobs:
         with:
           app-name: 'appointmentmanager'
           slot-name: 'Production'
-          package: .          
+          package: .
