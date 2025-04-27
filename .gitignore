@@ -1,0 +1,87 @@
+# Ignore bin and obj folders
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+
+# Rider/JetBrains IDE files
+.idea/
+
+# VSCode
+.vscode/
+
+# Dotnet Tools
+*.dotnet/tools/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Publish outputs
+publish/
+
+# Logs
+*.log
+
+# Secrets
+secrets.json
+
+# Local database
+*.mdf
+*.ldf
+
+# Entity Framework Core Migrations folder (optional, if you don't want to push migrations)
+#migrations/
+
+# App settings for local environment
+appsettings.Development.json
+
+# User secrets folder (if you're using dotnet user-secrets)
+**/.microsoft/usersecrets/
+
+# Azure specific files
+*.azurePubxml
+*.PublishSettings
+
+# IIS Express folder
+.vs/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+# Test results
+TestResults/
+coverage/
+
+# Paket dependency manager
+.paket/
+paket-files/
+
+# NCrunch
+.ncrunch*
+
+# WebStorm/Web Tools
+*.idea/
+
+# Windows specific
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# MacOS specific
+.DS_Store
+.AppleDouble
+.LSOverride
