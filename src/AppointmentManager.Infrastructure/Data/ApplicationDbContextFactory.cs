@@ -15,9 +15,9 @@ namespace AppointmentManager.Infrastructure.Data
 
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(basePath)
+                .AddEnvironmentVariables()
                 .AddJsonFile("appsettings.Development.json", optional: true)
                 .AddJsonFile("appsettings.json", optional: true)
-                .AddEnvironmentVariables()
                 .Build();
 
             var connectionString = configuration.GetConnectionString("DefaultConnection");
