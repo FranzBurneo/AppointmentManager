@@ -1,46 +1,54 @@
-﻿using AppointmentManager.Application.Interfaces;
+﻿using AppointmentManager.Application.DTOs.Employee;
+using AppointmentManager.Application.Interfaces;
 using AppointmentManager.Domain.Entities;
-using AppointmentManager.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
+using AppointmentManager.Domain.Interfaces;
+using AutoMapper;
 
 namespace AppointmentManager.Application.Services
 {
     public class EmployeeService : IEmployeeService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IRepository<Employee> _repository;
+        private readonly IMapper _mapper;
 
-        public EmployeeService(ApplicationDbContext context)
+        public EmployeeService(IRepository<Employee> repository, IMapper mapper)
         {
-            _context = context;
+            _repository = repository;
+            _mapper = mapper;
         }
 
         public async Task<IEnumerable<Employee>> GetAllAsync()
         {
-            return await _context.Employees.ToListAsync();
+            return await _repository.GetAllAsync();
         }
 
         public async Task<Employee?> GetByIdAsync(Guid id)
         {
-            return await _context.Employees.FindAsync(id);
+            return await _repository.GetByIdAsync(id);
         }
 
-        public async Task<Employee> AddAsync(Employee employee)
+        public async Task<Employee> AddAsync(CreateEmployeeDto dto)
         {
-            _context.Employees.Add(employee);
-            await _context.SaveChangesAsync();
+            var employee = _mapper.Map<Employee>(dto);
+            employee.Id = Guid.NewGuid();
+
+            await _repository.AddAsync(employee);
             return employee;
         }
 
-        public async Task<bool> UpdateAsync(Employee employee)
+        public async Task<bool> UpdateAsync(UpdateEmployeeDto dto)
         {
-            _context.Employees.Update(employee);
-            return await _context.SaveChangesAsync() > 0;
+            var existing = await _repository.GetByIdAsync(dto.Id);
+            if (existing == null) return false;
+
+            _mapper.Map(dto, existing);
+
+            return await _repository.UpdateAsync(existing);
         }
 
         public async Task<bool> DeleteAsync(Employee employee)
         {
-            _context.Employees.Remove(employee);
-            return await _context.SaveChangesAsync() > 0;
+            return await _repository.DeleteAsync(employee.Id);
         }
     }
 }

@@ -1,9 +1,12 @@
-﻿using AppointmentManager.Application.Interfaces;
+﻿using AppointmentManager.Application.DTOs.Company;
+using AppointmentManager.Application.Interfaces;
 using AppointmentManager.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AppointmentManager.API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CompanyController : ControllerBase
@@ -33,25 +36,28 @@ namespace AppointmentManager.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Company company)
+        public async Task<IActionResult> Create([FromBody] CreateCompanyDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            await _companyService.AddAsync(company);
+            var company = await _companyService.AddAsync(dto);
             return CreatedAtAction(nameof(GetById), new { id = company.Id }, company);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] Company company)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCompanyDto dto)
         {
-            if (id != company.Id)
+            if (id != dto.Id)
                 return BadRequest("ID mismatch.");
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            await _companyService.UpdateAsync(company);
+            var updated = await _companyService.UpdateAsync(dto);
+            if (!updated)
+                return NotFound();
+
             return NoContent();
         }
 

@@ -1,4 +1,5 @@
-﻿using AppointmentManager.Domain.Entities;
+﻿using AppointmentManager.Application.DTOs.EmployeeSchedule;
+using AppointmentManager.Domain.Entities;
 
 namespace AppointmentManager.Application.Interfaces
 {
@@ -6,8 +7,8 @@ namespace AppointmentManager.Application.Interfaces
     {
         Task<IEnumerable<EmployeeSchedule>> GetAllAsync();
         Task<EmployeeSchedule?> GetByIdAsync(Guid id);
-        Task AddAsync(EmployeeSchedule schedule);
-        Task UpdateAsync(EmployeeSchedule schedule);
-        Task DeleteAsync(EmployeeSchedule schedule);
+        Task<EmployeeSchedule> AddAsync(CreateEmployeeScheduleDto dto);
+        Task<bool> UpdateAsync(UpdateEmployeeScheduleDto dto);
+        Task<bool> DeleteAsync(Guid id);
     }
 }

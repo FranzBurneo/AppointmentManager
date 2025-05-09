@@ -1,45 +1,45 @@
-﻿using AppointmentManager.Application.Interfaces;
+﻿using AppointmentManager.Application.DTOs.Appointment;
+using AppointmentManager.Application.Interfaces;
 using AppointmentManager.Domain.Entities;
-using AppointmentManager.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
+using AppointmentManager.Domain.Interfaces;
+using AutoMapper;
 
 namespace AppointmentManager.Application.Services
 {
     public class AppointmentService : IAppointmentService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IRepository<Appointment> _repository;
+        private readonly IMapper _mapper;
 
-        public AppointmentService(ApplicationDbContext context)
+        public AppointmentService(IRepository<Appointment> repository, IMapper mapper)
         {
-            _context = context;
+            _repository = repository;
+            _mapper = mapper;
         }
 
         public async Task<IEnumerable<Appointment>> GetAllAsync()
-        {
-            return await _context.Appointments.ToListAsync();
-        }
+            => await _repository.GetAllAsync();
 
         public async Task<Appointment?> GetByIdAsync(Guid id)
+            => await _repository.GetByIdAsync(id);
+
+        public async Task<Appointment> AddAsync(CreateAppointmentDto dto)
         {
-            return await _context.Appointments.FindAsync(id);
+            var entity = _mapper.Map<Appointment>(dto);
+            entity.Id = Guid.NewGuid();
+            return await _repository.AddAsync(entity);
         }
 
-        public async Task AddAsync(Appointment appointment)
+        public async Task<bool> UpdateAsync(UpdateAppointmentDto dto)
         {
-            _context.Appointments.Add(appointment);
-            await _context.SaveChangesAsync();
+            var existing = await _repository.GetByIdAsync(dto.Id);
+            if (existing == null) return false;
+
+            _mapper.Map(dto, existing);
+            return await _repository.UpdateAsync(existing);
         }
 
-        public async Task UpdateAsync(Appointment appointment)
-        {
-            _context.Appointments.Update(appointment);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(Appointment appointment)
-        {
-            _context.Appointments.Remove(appointment);
-            await _context.SaveChangesAsync();
-        }
+        public async Task<bool> DeleteAsync(Guid id)
+            => await _repository.DeleteAsync(id);
     }
 }

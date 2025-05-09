@@ -1,9 +1,11 @@
-﻿using AppointmentManager.Application.Interfaces;
-using AppointmentManager.Domain.Entities;
+﻿using AppointmentManager.Application.DTOs.Appointment;
+using AppointmentManager.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AppointmentManager.API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AppointmentController : ControllerBase
@@ -33,36 +35,38 @@ namespace AppointmentManager.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Appointment appointment)
+        public async Task<IActionResult> Create([FromBody] CreateAppointmentDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            await _appointmentService.AddAsync(appointment);
-            return CreatedAtAction(nameof(GetById), new { id = appointment.Id }, appointment);
+            var created = await _appointmentService.AddAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] Appointment appointment)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateAppointmentDto dto)
         {
-            if (id != appointment.Id)
+            if (id != dto.Id)
                 return BadRequest("ID mismatch.");
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            await _appointmentService.UpdateAsync(appointment);
+            var success = await _appointmentService.UpdateAsync(dto);
+            if (!success)
+                return NotFound();
+
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var appointment = await _appointmentService.GetByIdAsync(id);
-            if (appointment == null)
+            var success = await _appointmentService.DeleteAsync(id);
+            if (!success)
                 return NotFound();
 
-            await _appointmentService.DeleteAsync(appointment);
             return NoContent();
         }
     }

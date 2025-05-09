@@ -1,9 +1,12 @@
-﻿using AppointmentManager.Application.Interfaces;
+﻿using AppointmentManager.Application.DTOs.Employee;
+using AppointmentManager.Application.Interfaces;
 using AppointmentManager.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AppointmentManager.API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class EmployeeController : ControllerBase
@@ -33,25 +36,29 @@ namespace AppointmentManager.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Employee employee)
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateEmployeeDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            await _employeeService.AddAsync(employee);
-            return CreatedAtAction(nameof(GetById), new { id = employee.Id }, employee);
+            var created = await _employeeService.AddAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] Employee employee)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateEmployeeDto dto)
         {
-            if (id != employee.Id)
+            if (id != dto.Id)
                 return BadRequest("ID mismatch.");
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            await _employeeService.UpdateAsync(employee);
+            var updated = await _employeeService.UpdateAsync(dto);
+            if (!updated)
+                return NotFound();
+
             return NoContent();
         }
 
